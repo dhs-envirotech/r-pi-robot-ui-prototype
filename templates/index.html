@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Motor Control</title>
+</head>
+<body>
+    <h1>Raspberry Pi Motor Control</h1>
+    <div id="joystick-container">
+        <div id="joystick"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var joystickContainer = document.getElementById('joystick-container');
+            var joystick = nipplejs.create({
+                zone: joystickContainer,
+                mode: 'static',
+                position: { top: '50%', left: '50%' },
+                color: 'blue'
+            });
+
+            joystick.on('move', function (evt, data) {
+                // Send joystick data to the server (Flask)
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/control');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ angle: data.angle.degree, force: data.force }));
+            });
+
+            joystick.on('end', function () {
+                // Stop the motor when the joystick is released
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/stop');
+                xhr.send();
+            });
+        });
+    </script>
+</body>
+</html>
+
